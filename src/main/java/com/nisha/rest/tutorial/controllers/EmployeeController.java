@@ -4,10 +4,12 @@ import com.nisha.rest.tutorial.entities.Employee;
 import com.nisha.rest.tutorial.exception.EmployeeNotFoundException;
 import com.nisha.rest.tutorial.repositories.EmployeeRepository;
 import org.hibernate.EntityMode;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -21,16 +23,31 @@ public class EmployeeController {
         this.repository = repository;
     }
 
+    // Getting an aggregate 'root'
+//    @GetMapping("/employees")
+//    List<Employee> all() {
+//        return repository.findAll();
+//    }
+
+    // Now getting an aggregate root 'resource'
     @GetMapping("/employees")
-    List<Employee> getAllEmployees() {
-        return repository.findAll();
+    CollectionModel<EntityModel<Employee>> all() {
+
+        List<EntityModel<Employee>> employees = repository.findAll().stream()
+                .map(employee -> EntityModel.of(employee,
+                        linkTo(methodOn(EmployeeController.class).one(employee.getId())).withSelfRel(),
+                        linkTo(methodOn(EmployeeController.class).all()).withRel("employees")))
+                .collect(Collectors.toList());
+
+        return CollectionModel.of(employees,
+                linkTo(methodOn(EmployeeController.class).all()).withSelfRel());
     }
 
     @PostMapping("/employees")
     Employee addNewEmployee(@RequestBody Employee newEmployee) {
         return repository.save(newEmployee);
     }
-    
+
 
     @GetMapping("employees/{id}")
     EntityModel<Employee> one(@PathVariable Long id) {
@@ -39,7 +56,7 @@ public class EmployeeController {
 
         return EntityModel.of(employee,
                 linkTo(methodOn(EmployeeController.class).one(id)).withSelfRel(),
-                linkTo(methodOn(EmployeeController.class).getAllEmployees()).withRel("employees"));
+                linkTo(methodOn(EmployeeController.class).all()).withRel("employees"));
     }
 
     @PutMapping("/employees/{id}")
