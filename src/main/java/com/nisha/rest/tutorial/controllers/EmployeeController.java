@@ -1,5 +1,6 @@
 package com.nisha.rest.tutorial.controllers;
 
+import com.nisha.rest.tutorial.assembler.EmployeeModelAssembler;
 import com.nisha.rest.tutorial.entities.Employee;
 import com.nisha.rest.tutorial.exception.EmployeeNotFoundException;
 import com.nisha.rest.tutorial.repositories.EmployeeRepository;
@@ -18,9 +19,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class EmployeeController {
 
     private final EmployeeRepository repository;
+    private final EmployeeModelAssembler assembler;
 
-    public EmployeeController(EmployeeRepository repository) {
+    public EmployeeController(EmployeeRepository repository, EmployeeModelAssembler assembler) {
         this.repository = repository;
+        this.assembler = assembler;
     }
 
     // Getting an aggregate 'root'
@@ -31,12 +34,10 @@ public class EmployeeController {
 
     // Now getting an aggregate root 'resource'
     @GetMapping("/employees")
-    CollectionModel<EntityModel<Employee>> all() {
+    public CollectionModel<EntityModel<Employee>> all() {
 
         List<EntityModel<Employee>> employees = repository.findAll().stream()
-                .map(employee -> EntityModel.of(employee,
-                        linkTo(methodOn(EmployeeController.class).one(employee.getId())).withSelfRel(),
-                        linkTo(methodOn(EmployeeController.class).all()).withRel("employees")))
+                .map(assembler::toModel)
                 .collect(Collectors.toList());
 
         return CollectionModel.of(employees,
@@ -44,23 +45,21 @@ public class EmployeeController {
     }
 
     @PostMapping("/employees")
-    Employee addNewEmployee(@RequestBody Employee newEmployee) {
+    public Employee addNewEmployee(@RequestBody Employee newEmployee) {
         return repository.save(newEmployee);
     }
 
 
     @GetMapping("employees/{id}")
-    EntityModel<Employee> one(@PathVariable Long id) {
+    public EntityModel<Employee> one(@PathVariable Long id) {
         Employee employee = repository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException(id));
 
-        return EntityModel.of(employee,
-                linkTo(methodOn(EmployeeController.class).one(id)).withSelfRel(),
-                linkTo(methodOn(EmployeeController.class).all()).withRel("employees"));
+        return assembler.toModel(employee);
     }
 
     @PutMapping("/employees/{id}")
-    Employee updateEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
+    public Employee updateEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
         return repository.findById(id)
                 .map(employee -> {
                     employee.setName(newEmployee.getName());
