@@ -8,14 +8,18 @@ import java.util.Objects;
 @Entity
 public class Employee {
 
-    private @Id @GeneratedValue Long id;
-    private String name;
+    @Id
+    @GeneratedValue
+    private Long id;
     private String role;
+    private String firstName;
+    private String lastName;
 
     Employee() {}
 
-    public Employee(String name, String role) {
-        this.name = name;
+    public Employee(String firstName, String lastName, String role) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.role = role;
     }
 
@@ -28,11 +32,37 @@ public class Employee {
     }
 
     public String getName() {
-        return name;
+        return firstName + " " + lastName;
     }
 
     public void setName(String name) {
-        this.name = name;
+        String[] parts = name.split(" ");
+        if (parts.length == 0) {
+            this.firstName = "sampleFirst Name";
+            this.lastName = "sampleLastname";
+        } else if (parts.length < 2) {
+            this.firstName = parts[0];
+            this.lastName = "";
+        } else {
+            this.firstName = parts[0];
+            this.lastName = parts[1];
+        }
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getRole() {
@@ -60,8 +90,9 @@ public class Employee {
     public String toString() {
         return "Employee{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
                 ", role='" + role + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 '}';
     }
 }

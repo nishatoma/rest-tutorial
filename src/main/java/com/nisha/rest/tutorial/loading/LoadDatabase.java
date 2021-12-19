@@ -16,8 +16,8 @@ public class LoadDatabase {
     @Bean
     CommandLineRunner initDatabase(EmployeeRepository employeeRepository) {
         return (args) -> {
-            LOGGER.info("Saving Employee: " + employeeRepository.save(new Employee("Bilbo Baggins", "burglar")));
-            LOGGER.info("Saving Employee: " + employeeRepository.save(new Employee("Frodo Baggins", "burglar")));
+            LOGGER.info("Saving Employee: " + employeeRepository.save(new Employee("Bilbo","Baggins", "burglar")));
+            LOGGER.info("Saving Employee: " + employeeRepository.save(new Employee("Frodo","Baggins", "thief")));
 
         };
     }
