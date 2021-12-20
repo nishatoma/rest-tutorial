@@ -4,7 +4,6 @@ import com.nisha.rest.tutorial.assembler.EmployeeModelAssembler;
 import com.nisha.rest.tutorial.entities.Employee;
 import com.nisha.rest.tutorial.exception.EmployeeNotFoundException;
 import com.nisha.rest.tutorial.repositories.EmployeeRepository;
-import org.hibernate.EntityMode;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
